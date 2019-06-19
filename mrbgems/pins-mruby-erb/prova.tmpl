@@ -1,0 +1,10 @@
+
+    function plot_controls( self )
+      plot(...
+<% ["A","B","C","D","E"].each do |item| -%>
+        self.zeta(), self.<%= item %>(), ...
+<% end -%>
+        'Linewidth', 2 ...
+      );
+      title('controls');
+    end

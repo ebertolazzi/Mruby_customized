@@ -1,0 +1,4 @@
+.yardoc
+*.a
+libs/
+.vscode
