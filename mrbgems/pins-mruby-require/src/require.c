@@ -91,9 +91,9 @@ static
 int
 compile_rb2mrb(
   mrb_state  * mrb0,
-  const char * code,
+  char const * code,
   int          code_len,
-  const char * path,
+  char const * path,
   FILE       * tmpfp
 ) {
   mrb_state    * mrb;
