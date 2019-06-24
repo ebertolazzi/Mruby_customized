@@ -80,7 +80,7 @@ module SymDesc
 	       SymDesc/BinaryOp/Prod.rb
 	       SymDesc/BinaryOp/Div.rb
 	  |.each do |file|
-		  require_relative file, __FILE__
+		  sd_require_relative file
 	  end
 
 	ZERO = Int.new 0

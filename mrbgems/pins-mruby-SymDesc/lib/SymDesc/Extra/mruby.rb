@@ -21,17 +21,20 @@
 # SOFTWARE.
 
 module Kernel
-	##unless respond_to? :require_relative
-	##    def require_relative(file)
-	##    	filename = caller.first
-	##    	while filename[-1] != ':'
-	##    		filename.chop!
-	##    	end
-	##    	filename.chop!
-	##    	filename = File.expand_path filename
-	##        require File.expand_path(file,File.dirname(filename))
-	##    end
-	##end
+
+	def sd_require_relative(file)
+		filename = caller.first
+		while filename[-1] != ':'
+			filename.chop!
+		end
+		filename.chop!
+		filename = File.expand_path filename
+	    require File.expand_path(file,File.dirname(filename))
+	end
+
+    unless respond_to? :require_relative
+        alias :require_relative :sd_require_relative
+    end
 
 	unless respond_to? :warn
 		def warn(msg, loc = nil)
