@@ -90,8 +90,8 @@ module Kernel
   # @param rel_path [String] Relative path of file to be loaded
   # @param file [String] File or path defining the search start. Default to ".".
   # @return [Bool] Result of the underlying call to `require`
-  def require_relative( rel_path, file )
-    require File.expand_path(File.dirname(file)).gsub(/[\\\/]+$/, '') + "/" + rel_path
+  def require_relative( rel_path, script_path )
+    require File.expand_path(File.dirname(script_path)).gsub(/[\\\/]+$/, '') + "/" + rel_path
   end
 
 end

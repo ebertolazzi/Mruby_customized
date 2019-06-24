@@ -152,8 +152,11 @@ MRuby::Build.new do |conf|
   conf.gem "#{dir}/mrbgems/mruby-shell"
   conf.gem "#{dir}/mrbgems/mruby-mechatronix"
 
+  conf.gem "#{dir}/mrbgems/mruby-mtest"
+  conf.gem "#{dir}/mrbgems/SymDesc"
+
   # GEMS INCLUDED AFTER mruby-emb-require WILL BE COMPILED AS SEPARATE object
-  # AND MUST BE LOADED AS require 'mruby-hs-regexp'
+  # AND MUST BE LOADED AS require 'name-of-the-gem'
   conf.gem "#{dir}/mrbgems/pins-mruby-require"
 
 end
