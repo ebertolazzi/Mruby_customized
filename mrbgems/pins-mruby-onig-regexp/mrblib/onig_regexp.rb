@@ -49,7 +49,7 @@ class String
 
   # redefine methods with oniguruma regexp version
   %i[sub gsub split scan].each do |v|
-    alias_method :"string_#{v}", v
+    alias_method :"string_#{v}", v if method_defined?(v)
     alias_method v, :"onig_regexp_#{v}"
   end
 
