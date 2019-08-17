@@ -482,6 +482,16 @@ mrb_require_load_file( mrb_state * mrb, mrb_value self ) {
   return mrb_true_value();
 }
 
+/*
+static mrb_value
+mruby_gv_get(mrb_state *mrb, mrb_value self)
+{
+  mrb_sym sym;
+  mrb_get_args(mrb, "n", &sym);
+  return mrb_gv_get(mrb,sym);
+}
+*/
+
 void
 mrb_pins_mruby_require_gem_init( mrb_state * mrb ) {
   struct RClass *krn;
@@ -504,6 +514,13 @@ mrb_pins_mruby_require_gem_init( mrb_state * mrb ) {
     mrb_require_load_file,
     MRB_ARGS_REQ(1)
   );
+/*  
+  mrb_define_method(
+    mrb, krn, "___gv_get",
+    mruby_gv_get,
+    MRB_ARGS_REQ(1)
+  );
+*/
 }
 
 void
