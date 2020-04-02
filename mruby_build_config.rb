@@ -157,7 +157,11 @@ MRuby::Build.new do |conf|
 
   # GEMS INCLUDED AFTER mruby-emb-require WILL BE COMPILED AS SEPARATE object
   # AND MUST BE LOADED AS require 'name-of-the-gem'
-  conf.gem "#{dir}/mrbgems/pins-mruby-require"
+  #if OS == :win
+  # conf.gem "#{dir}/mrbgems/pins-mruby-require"
+  #else
+  conf.gem "#{dir}/mrbgems/mruby-require"
+  #end
 
 
 end
