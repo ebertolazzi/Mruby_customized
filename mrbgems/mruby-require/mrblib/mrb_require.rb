@@ -1,5 +1,6 @@
 
 module Kernel
+=begin
   def require_relative(file,path = nil)
     filename = nil
     unless path
@@ -17,6 +18,7 @@ module Kernel
     filename ||= path
 	  require File.expand_path(file,File.dirname(filename))
   end
+=end
 private
 
   def __call_stack

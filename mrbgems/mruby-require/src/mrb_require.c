@@ -14,6 +14,9 @@
 #include "mruby/array.h"
 #include "mruby/numeric.h"
 #include "mruby/string.h"
+#include "mruby/class.h"
+#include "mruby/debug.h"
+#include "mruby/error.h"
 
 #include "opcode.h"
 #include <stdio.h>
@@ -22,6 +25,7 @@
 #include <sys/types.h>
 #include <limits.h>
 #include <setjmp.h>
+#include <libgen.h>
 #if defined(_MSC_VER) || defined(__MINGW32__)
 #ifndef PATH_MAX
 # define PATH_MAX MAX_PATH
@@ -570,6 +574,85 @@ mrb_f_require(mrb_state *mrb, mrb_value self)
   return mrb_require(mrb, filename);
 }
 
+mrb_value
+find_current_exec_file_path(mrb_state *mrb)
+{
+  const char *filename, *dname;
+  ptrdiff_t ciidx = mrb->c->ci - mrb->c->cibase;
+  mrb_code *pc0   = mrb->c->ci->pc;
+
+  if (ciidx >= mrb->c->ciend - mrb->c->cibase)
+    ciidx = 10; /* ciidx is broken... */
+
+  ptrdiff_t i;
+  for (i=ciidx; i >= 0; i--) {
+    mrb_callinfo *ci;
+    mrb_irep *irep;
+    mrb_code *pc;
+
+    ci = &mrb->c->cibase[i];
+
+    if (!ci->proc) continue;
+    if (MRB_PROC_CFUNC_P(ci->proc)) continue;
+
+    irep = ci->proc->body.irep;
+    if (!irep) continue;
+
+    if (mrb->c->cibase[i].err) {
+      pc = mrb->c->cibase[i].err;
+    }
+    else if (i+1 <= ciidx) {
+      if (!mrb->c->cibase[i + 1].pc) continue;
+      pc = &mrb->c->cibase[i+1].pc[-1];
+    }
+    else {
+      pc = pc0;
+    }
+    
+    filename = mrb_debug_get_filename(mrb, irep, pc - irep->iseq);
+    if (!filename) {
+      mrb_raisef(mrb, E_RUNTIME_ERROR, "failed to retrieve current filename");
+    }
+    
+    //printf("Found path: %s\n", filename);
+
+    break;
+
+  }
+  
+  // printf("copying string\n");
+  char copy[strlen(filename)];
+  strcpy(&copy, filename);
+  
+  // printf("Obtained filename: %s\n", &copy);
+
+  if ((dname = dirname(&copy)) == NULL) {
+    mrb_sys_fail(mrb, "dirname");
+  }
+
+  return mrb_str_new_cstr(mrb, dname);
+}
+
+mrb_value
+mrb_f_require_relative(mrb_state *mrb, mrb_value self)
+{
+  mrb_value filename, filepath;
+  
+  mrb_get_args(mrb, "o", &filename);
+  if (mrb_type(filename) != MRB_TT_STRING) {
+    mrb_raisef(mrb, E_TYPE_ERROR, "can't convert %S into String", filename);
+    return mrb_nil_value();
+  }
+
+  filepath = find_current_exec_file_path(mrb);
+  // printf("Searching path from: \n");
+  // printf("- %s\n", mrb_str_to_cstr(mrb, filepath));
+  // printf("- %s\n", mrb_str_to_cstr(mrb, filename));
+  mrb_value file = mrb_funcall(mrb, mrb_obj_value(mrb_class_get(mrb, "File")), "expand_path", 2, filename, filepath);
+  // printf("Expanded path is: %s\n", mrb_str_to_cstr(mrb, file));
+  mrb_require(mrb, file);
+}
+
 static mrb_value
 mrb_init_load_path(mrb_state *mrb)
 {
@@ -603,6 +686,7 @@ mrb_mruby_require_gem_init(mrb_state* mrb)
 
   mrb_define_method(mrb, krn, "load",    mrb_f_load,    MRB_ARGS_REQ(1));
   mrb_define_method(mrb, krn, "require", mrb_f_require, MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, krn, "require_relative", mrb_f_require_relative, MRB_ARGS_REQ(1));
 
   load_error = mrb_define_class(mrb, "LoadError", E_SCRIPT_ERROR);
   mrb_define_method(mrb, load_error, "path", mrb_load_error_path, MRB_ARGS_NONE());
